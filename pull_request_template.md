@@ -1,4 +1,4 @@
-﻿---
+﻿﻿---
 name: Feature/Bug Fix Submission
 about: Use this template for submitting your tested code to the 'develop' branch.
 title: 'Fix: [Briefly describe the fix]'
