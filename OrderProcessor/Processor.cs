@@ -19,13 +19,15 @@ namespace OrderProcessor
             var customer = _customerRepository.GetCustomer(customerId);
 
             // BUG 1: Should be >= not >
-            if (customer.AccountBalance > order.Amount)
+            if (customer.AccountBalance >= order.Amount)
             {
                 // BUG 2: Premium customers should get rush orders for free
                 if (order.IsRush)
                 {
                     // This is always charging, which is wrong.
-                    customer.AccountBalance -= (order.Amount + 20); // $20 rush fee
+                    if(customer.AccountBalance>=order.Amount+20)
+                       customer.AccountBalance -= (order.Amount + 20); // $20 rush fee
+                    else return new OrderResult { IsApproved = false, Message = "Insufficient funds for order + fees." };
                 }
 
                 return new OrderResult { IsApproved = true, Message = "Order approved." };
