@@ -21,20 +21,28 @@ namespace OrderProcessor
             // BUG 1: Should be >= not >
             if (customer.AccountBalance >= order.Amount)
             {
-                // BUG 2: Premium customers should get rush orders for free
+                //// BUG 2: Premium customers should get rush orders for free
                 if (order.IsRush)
                 {
-                    // This is always charging, which is wrong.
+                    // Charge rush order fee only for non premium users
+                    bool rushOrderFee = !customer.IsPremium;
+
+                    
                     if(customer.AccountBalance>=order.Amount+20)
-                       customer.AccountBalance -= (order.Amount + 20); // $20 rush fee
+                       customer.AccountBalance -= order.Amount + 20 * (rushOrderFee ? 1 : 0); // $20 rush fee
                     else return new OrderResult { IsApproved = false, Message = "Insufficient funds for order + fees." };
                 }
+                else // Charge normal order amount
+                    customer.AccountBalance -= order.Amount;
 
                 return new OrderResult { IsApproved = true, Message = "Order approved." };
             }
 
             // BUG 3: The logic here is completely missing.
             // It should approve for premium customers even with insufficient funds.
+            if (customer.IsPremium) {
+                return new OrderResult { IsApproved = true, Message = "Order approved." };
+            }
 
             return new OrderResult { IsApproved = false, Message = "Insufficient funds." };
         }

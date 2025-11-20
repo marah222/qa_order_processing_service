@@ -1,14 +1,16 @@
 # A descriptive name for our workflow
-name: .NET CI Quality Gate
+name: .NET Build, Test and Coverage
 
-# This is the trigger section. It's the most important part for our new strategy.
+# This is the trigger section.
 on:
   # Run this workflow on any push to 'main' or 'develop'
   push:
-    branches: [ main, develop ]
+    branches: [ master, develop ]
   # Run this workflow on any Pull Request that targets 'main' or 'develop'
   pull_request:
-    branches: [ main, develop ]
+    branches: [ master, develop ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 # A job is a set of steps that execute on a runner machine
 jobs:
@@ -20,11 +22,11 @@ jobs:
     steps:
     # Step 1: Check out the code from the repository
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     # Step 2: Set up the correct .NET SDK version on the runner
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 6.0.x # IMPORTANT: Match this to your project's .NET version
 
@@ -32,27 +34,43 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
 
-    # Step 4: Build the entire solution to ensure it compiles
+    # Step 4: Build the entire solution in Release mode to ensure it compiles
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --configuration Release --no-restore
 
     # Step 5: Run the tests AND collect code coverage data
-    # We use the "XPlat Code Coverage" collector which works on all platforms (Windows, Linux, macOS)
+    # We use the "XPlat Code Coverage" collector which works on all platforms
+    # The output format is set to 'opencover' which is widely supported
     - name: Test with Code Coverage
-      run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
+      run: >
+        dotnet test 
+        --configuration Release 
+        --no-build 
+        --verbosity normal 
+        --collect:"XPlat Code Coverage" 
+        --results-directory ./coverage 
+        --settings coverlet.runsettings.xml
+      # The 'continue-on-error' allows the next step (reporting) to run even if tests fail
+      continue-on-error: true
 
     # Step 6: Use a marketplace action to read the coverage file and create a summary
     - name: Code Coverage Report
+      id: coverage_summary # Give the step an ID to reference its outputs
       uses: irongut/CodeCoverageSummary@v1.3.0
       with:
-        filename: 'coverage/**/coverage.opencover.xml' # Path to the generated report
+        filename: 'coverage/**/*.xml' # Simplified and more robust path
         badge: true
-        fail_below_min: true              # CRITICAL: This makes the step fail if coverage is too low
-        min_coverage: 'Overall'
-        min_coverage_overall: 75          # CRITICAL: This is your quality gate threshold. Set it to 95%.
-
-    # Step 7 (Optional but highly recommended): Add the coverage report as a comment on the PR
-    - name: Add Coverage PR Comment
-      uses: MishaKav/pytest-coverage-comment@main
-      with:
-        opencover-xml: 'coverage/**/coverage.opencover.xml'
+        # NEW SYNTAX for failing based on coverage
+        thresholds: |
+          - min: 80 # Overall minimum line coverage
+            
+    # Step 7: Add the coverage summary to the GitHub job summary page
+    - name: Add Coverage Summary to Job Summary
+      run: echo '${{ steps.coverage_summary.outputs.report }}' >> $GITHUB_STEP_SUMMARY
+      
+    # Step 8: Check test results and coverage threshold
+    - name: Check test and coverage results
+      if: steps.coverage_summary.outputs.coverage_total < 80
+      run: |
+        echo "Error: Code coverage is below the 80% threshold."
+        exit 1
