@@ -7,6 +7,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderProcessor", "OrderProc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderProcessor.Tests", "OrderProcessor.Tests\OrderProcessor.Tests.csproj", "{A8742B4E-CB45-4685-935A-CCFE026F1964}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{F8BF42D7-9318-45BE-8BE7-1C485D3B9D27}"
+	ProjectSection(SolutionItems) = preProject
+		pull_request_template.md = pull_request_template.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{0E40ACA3-A9A0-419B-A100-C1C14560B1DD}"
+	ProjectSection(SolutionItems) = preProject
+		dotnet-ci.yml = dotnet-ci.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,6 +34,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0E40ACA3-A9A0-419B-A100-C1C14560B1DD} = {F8BF42D7-9318-45BE-8BE7-1C485D3B9D27}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C98CDDCD-8132-40CB-A4B2-696D2A0F8A56}

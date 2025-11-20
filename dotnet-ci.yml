@@ -1,0 +1,58 @@
+# A descriptive name for our workflow
+name: .NET CI Quality Gate
+
+# This is the trigger section. It's the most important part for our new strategy.
+on:
+  # Run this workflow on any push to 'main' or 'develop'
+  push:
+    branches: [ main, develop ]
+  # Run this workflow on any Pull Request that targets 'main' or 'develop'
+  pull_request:
+    branches: [ main, develop ]
+
+# A job is a set of steps that execute on a runner machine
+jobs:
+  build-and-test:
+    # Use the latest version of Ubuntu provided by GitHub
+    runs-on: ubuntu-latest
+
+    # These are the individual steps the job will perform
+    steps:
+    # Step 1: Check out the code from the repository
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: Set up the correct .NET SDK version on the runner
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x # IMPORTANT: Match this to your project's .NET version
+
+    # Step 3: Restore all the NuGet packages for the solution
+    - name: Restore dependencies
+      run: dotnet restore
+
+    # Step 4: Build the entire solution to ensure it compiles
+    - name: Build
+      run: dotnet build --no-restore
+
+    # Step 5: Run the tests AND collect code coverage data
+    # We use the "XPlat Code Coverage" collector which works on all platforms (Windows, Linux, macOS)
+    - name: Test with Code Coverage
+      run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
+
+    # Step 6: Use a marketplace action to read the coverage file and create a summary
+    - name: Code Coverage Report
+      uses: irongut/CodeCoverageSummary@v1.3.0
+      with:
+        filename: 'coverage/**/coverage.opencover.xml' # Path to the generated report
+        badge: true
+        fail_below_min: true              # CRITICAL: This makes the step fail if coverage is too low
+        min_coverage: 'Overall'
+        min_coverage_overall: 75          # CRITICAL: This is your quality gate threshold. Set it to 95%.
+
+    # Step 7 (Optional but highly recommended): Add the coverage report as a comment on the PR
+    - name: Add Coverage PR Comment
+      uses: MishaKav/pytest-coverage-comment@main
+      with:
+        opencover-xml: 'coverage/**/coverage.opencover.xml'
