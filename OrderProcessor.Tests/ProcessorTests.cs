@@ -31,6 +31,15 @@ namespace OrderProcessor.Tests
         }
 
         [Test]
+        public void ProcessOrder_WithSufficientFunds_EdgeCase()
+        {
+            //Arange
+            var customer = new Customer { AccountBalance = 250 };
+            _mockCustomerRepo.Setup(r => r.GetCustomer(2)).Returns(customer);
+            var order = new Order { Amount = 250 };
+
+            // Act
+            var result = _processor.ProcessOrder(2, order);
         public void ProcessOrder_PremiumCustomer_WithInsufficientFunds_ApprovesOrder()
         {
             // Arrange
@@ -71,6 +80,18 @@ namespace OrderProcessor.Tests
         }
 
         [Test]
+        public void ProcessOrder_WithSufficientFunds_NegativeCase()
+        {
+            //Arange
+            var customer = new Customer { AccountBalance = 250 };
+            _mockCustomerRepo.Setup(r => r.GetCustomer(3)).Returns(customer);
+            var order = new Order { Amount = 300 };
+
+            // Act
+            var result = _processor.ProcessOrder(3, order);
+
+            // Assert
+            Assert.IsFalse(result.IsApproved);
         public void ProcessOrder_StandardCustomer_WithInsufficientFunds_ApprovesOrder()
         {
             // Arrange

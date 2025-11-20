@@ -19,7 +19,7 @@ namespace OrderProcessor
             var customer = _customerRepository.GetCustomer(customerId);
 
             // BUG 1: Should be >= not >
-            if (customer.AccountBalance > order.Amount)
+            if (customer.AccountBalance >= order.Amount)
             {
                 //// BUG 2: Premium customers should get rush orders for free
                 if (order.IsRush)
