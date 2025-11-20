@@ -18,15 +18,17 @@ namespace OrderProcessor
         {
             var customer = _customerRepository.GetCustomer(customerId);
 
-            // BUG 1: Should be >= not >
-            if (customer.AccountBalance > order.Amount)
+            var chargerAmount = order.Amount;
+            if (order.IsRush)
             {
-                // BUG 2: Premium customers should get rush orders for free
-                if (order.IsRush)
-                {
-                    // This is always charging, which is wrong.
-                    customer.AccountBalance -= (order.Amount + 20); // $20 rush fee
-                }
+                chargerAmount += 20;
+            }
+
+
+            if (customer.AccountBalance > chargerAmount)//pre
+            {
+
+                customer.AccountBalance -= chargerAmount;
 
                 return new OrderResult { IsApproved = true, Message = "Order approved." };
             }
