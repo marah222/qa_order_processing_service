@@ -40,6 +40,7 @@ namespace OrderProcessor.Tests
 
             // Act
             var result = _processor.ProcessOrder(2, order);
+        }
         public void ProcessOrder_PremiumCustomer_WithInsufficientFunds_ApprovesOrder()
         {
             // Arrange
@@ -68,7 +69,7 @@ namespace OrderProcessor.Tests
         public void ProcessOrder_PremiumCustomer_WithSufficientFunds_ApprovesOrder()
         {
             // Arrange
-            var customer = new Customer { IsPremium=true, AccountBalance = 200m };
+            var customer = new Customer { IsPremium = true, AccountBalance = 200m };
             _mockCustomerRepo.Setup(r => r.GetCustomer(1)).Returns(customer);
             var order = new Order { Amount = 100m };
 
@@ -92,6 +93,7 @@ namespace OrderProcessor.Tests
 
             // Assert
             Assert.IsFalse(result.IsApproved);
+        }
         public void ProcessOrder_StandardCustomer_WithInsufficientFunds_ApprovesOrder()
         {
             // Arrange
@@ -104,54 +106,105 @@ namespace OrderProcessor.Tests
 
             // Assert
             Assert.IsFalse(result.IsApproved);
-        [TestCase(1, 200, 100)]
-        public void ProcessOrder_PremiumCustomerWithRush_ShouldNotChargeFee(int id, decimal accountBalance, decimal orderAmount)
-        {
-            // Arrange
-            var premiumCustomer = new Customer() { AccountBalance = accountBalance, IsPremium = true };
-            _mockCustomerRepo.Setup(r => r.GetCustomer(id)).Returns(premiumCustomer);
-
-            var order = new Order { Amount = orderAmount, IsRush = true };
-
-            //Act
-            var result = _processor.ProcessOrder(id, order);
-
-            //Assert
-            Assert.That(premiumCustomer.AccountBalance, Is.EqualTo(accountBalance - orderAmount));
         }
-        [Test]
-        [TestCase(1, 200, 100)]
-        public void ProcessOrder_StandardCustomerWithRush_ShouldNotChargeFee(int id, decimal accountBalance, decimal orderAmount)
-        {
-            // Arrange
-            var premiumCustomer = new Customer() { AccountBalance = accountBalance, IsPremium = false };
-            _mockCustomerRepo.Setup(r => r.GetCustomer(id)).Returns(premiumCustomer);
+            [TestCase(1, 200, 100)]
+            public void ProcessOrder_PremiumCustomerWithRush_ShouldNotChargeFee(int id, decimal accountBalance, decimal orderAmount)
+            {
+                // Arrange
+                var premiumCustomer = new Customer() { AccountBalance = accountBalance, IsPremium = true };
+                _mockCustomerRepo.Setup(r => r.GetCustomer(id)).Returns(premiumCustomer);
 
-            var order = new Order { Amount = orderAmount, IsRush = true };
+                var order = new Order { Amount = orderAmount, IsRush = true };
 
-            //Act
-            var result = _processor.ProcessOrder(id, order);
+                //Act
+                var result = _processor.ProcessOrder(id, order);
 
-            //Assert
-            Assert.That(premiumCustomer.AccountBalance, Is.EqualTo(accountBalance - orderAmount  - 20));
-        }
-        
-        [Test]
-        [TestCase(1,200,100, true)]
-        [TestCase(1,200,100, false)]
-        public void ProcessOrder_NonRushOrder_ShouldNotChargeFee(int  id, decimal accountBalance, decimal orderAmount, bool isPremium)
-        {
-            // Arrange
-            var premiumCustomer = new Customer() { AccountBalance = accountBalance, IsPremium = isPremium };
-            _mockCustomerRepo.Setup(r => r.GetCustomer(id)).Returns(premiumCustomer);
+                //Assert
+                Assert.That(premiumCustomer.AccountBalance, Is.EqualTo(accountBalance - orderAmount));
+            }
+            [Test]
+            [TestCase(1, 200, 100)]
+            public void ProcessOrder_StandardCustomerWithRush_ShouldNotChargeFee(int id, decimal accountBalance, decimal orderAmount)
+            {
+                // Arrange
+                var premiumCustomer = new Customer() { AccountBalance = accountBalance, IsPremium = false };
+                _mockCustomerRepo.Setup(r => r.GetCustomer(id)).Returns(premiumCustomer);
 
-            var order = new Order { Amount = orderAmount, IsRush = false };
+                var order = new Order { Amount = orderAmount, IsRush = true };
 
-            //Act
-            var result = _processor.ProcessOrder(id, order);
+                //Act
+                var result = _processor.ProcessOrder(id, order);
 
-            //Assert
-            Assert.That(premiumCustomer.AccountBalance, Is.EqualTo(accountBalance - orderAmount));
+                //Assert
+                Assert.That(premiumCustomer.AccountBalance, Is.EqualTo(accountBalance - orderAmount - 20));
+            }
+
+            [Test]
+            [TestCase(1, 200, 100, true)]
+            [TestCase(1, 200, 100, false)]
+            public void ProcessOrder_NonRushOrder_ShouldNotChargeFee(int id, decimal accountBalance, decimal orderAmount, bool isPremium)
+            {
+                // Arrange
+                var premiumCustomer = new Customer() { AccountBalance = accountBalance, IsPremium = isPremium };
+                _mockCustomerRepo.Setup(r => r.GetCustomer(id)).Returns(premiumCustomer);
+
+                var order = new Order { Amount = orderAmount, IsRush = false };
+
+                //Act
+                var result = _processor.ProcessOrder(id, order);
+
+                //Assert
+                Assert.That(premiumCustomer.AccountBalance, Is.EqualTo(accountBalance - orderAmount));
+            }
+
+
+            [Test]
+            public void ChecKOrder_StandardCustomer_WithInsufficientFunds_ShouldRejectOrder()
+            {
+                var customer = new Customer { AccountBalance = 99.9m, IsPremium = false };
+                _mockCustomerRepo.Setup(r => r.GetCustomer(1)).Returns(customer);
+
+                var order = new Order { Amount = 100m };
+
+                // Act
+                var result = _processor.ProcessOrder(1, order);
+
+                // Assert
+                Assert.IsFalse(result.IsApproved);
+            }
+
+
+            [Test]
+            public void ProcessOrder_StandardCustomer_RushOrder_WithInSufficientFunds_ShouldRejectOrder()
+            {
+                // Arrange
+                var customer = new Customer { AccountBalance = 110m, IsPremium = false };
+                _mockCustomerRepo.Setup(r => r.GetCustomer(1)).Returns(customer);
+                var order = new Order { Amount = 100m, IsRush = true };
+
+                // Act
+                var result = _processor.ProcessOrder(1, order);
+
+                // Assert
+                Assert.IsFalse(result.IsApproved);
+            }
+
+            [Test]
+            public void ChecKOrder_StandardCustomer_WithZeroBalance_ShouldRejectOrder()
+            {
+                var customer = new Customer { AccountBalance = 0m, IsPremium = false };
+                _mockCustomerRepo.Setup(r => r.GetCustomer(1)).Returns(customer);
+
+                var order = new Order { Amount = 1m };
+
+                // Act
+                var result = _processor.ProcessOrder(1, order);
+
+                // Assert
+                Assert.IsFalse(result.IsApproved);
+            }
+
+
+
         }
     }
-}

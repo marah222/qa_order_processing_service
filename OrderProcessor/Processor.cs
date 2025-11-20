@@ -27,7 +27,10 @@ namespace OrderProcessor
                     // Charge rush order fee only for non premium users
                     bool rushOrderFee = !customer.IsPremium;
 
-                    customer.AccountBalance -= order.Amount + 20 * (rushOrderFee ? 1 : 0); // $20 rush fee
+                    
+                    if(customer.AccountBalance>=order.Amount+20)
+                       customer.AccountBalance -= order.Amount + 20 * (rushOrderFee ? 1 : 0); // $20 rush fee
+                    else return new OrderResult { IsApproved = false, Message = "Insufficient funds for order + fees." };
                 }
                 else // Charge normal order amount
                     customer.AccountBalance -= order.Amount;
