@@ -8,24 +8,21 @@ assignees: ''
 
 ## 📝 Description
 
-*Provide a clear and concise description of the changes you made and the bug you fixed.*
-
+the PR includes 3 tests to test the proper rejection of orders with insufficient funds .
+also a fix to a bug in the order processing logic to not withdraw from the account if there aren't sufficient funds
 ---
 
 ## ✅ My Task
 
-*State the specific business rule you were assigned to fix and test (e.g., "The Premium Customer Override Rule").*
+the task was to ensure rejections happen correctly and for the right reasons.
 
 ---
 
 ## 🧪 How I Tested This
 
-*Describe the different scenarios and edge cases you wrote unit tests for. Be specific.*
-
-- [ ] Tested the main "happy path" scenario.
-- [ ] Tested the negative case (e.g., a standard customer with insufficient funds).
-- [ ] Tested an edge case (e.g., a customer with a balance exactly equal to the order amount).
-- [ ] ...add other tests you wrote...
+- [ ] Tested the Standard Customer, Insufficient Funds case
+- [ ] Tested the Standard Customer, Rush Order, Insufficient Funds case
+- [ ] Tested the Standard Customer, Zero Balance
 
 ---
 
