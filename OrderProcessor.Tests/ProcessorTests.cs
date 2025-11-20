@@ -28,5 +28,8 @@ namespace OrderProcessor.Tests
             // Assert
             Assert.IsTrue(result.IsApproved);
         }
+
+        [Test]
+
     }
 }
