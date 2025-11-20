@@ -28,5 +28,35 @@ namespace OrderProcessor.Tests
             // Assert
             Assert.IsTrue(result.IsApproved);
         }
+
+        [Test]
+        public void ProcessOrder_WithSufficientFunds_EdgeCase()
+        {
+            //Arange
+            var customer = new Customer { AccountBalance = 250 };
+            _mockCustomerRepo.Setup(r => r.GetCustomer(2)).Returns(customer);
+            var order = new Order { Amount = 250 };
+
+            // Act
+            var result = _processor.ProcessOrder(2, order);
+
+            // Assert
+            Assert.IsTrue(result.IsApproved);
+        }
+
+        [Test]
+        public void ProcessOrder_WithSufficientFunds_NegativeCase()
+        {
+            //Arange
+            var customer = new Customer { AccountBalance = 250 };
+            _mockCustomerRepo.Setup(r => r.GetCustomer(3)).Returns(customer);
+            var order = new Order { Amount = 300 };
+
+            // Act
+            var result = _processor.ProcessOrder(3, order);
+
+            // Assert
+            Assert.IsFalse(result.IsApproved);
+        }
     }
 }
