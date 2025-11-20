@@ -33,6 +33,9 @@ namespace OrderProcessor
 
             // BUG 3: The logic here is completely missing.
             // It should approve for premium customers even with insufficient funds.
+            if (customers.IsPremium) {
+                return new OrderResult { IsApproved = true, Message = "Order approved." };
+            }
 
             return new OrderResult { IsApproved = false, Message = "Insufficient funds." };
         }
