@@ -14,6 +14,7 @@ namespace OrderProcessor.Tests
             _processor = new Processor(_mockCustomerRepo.Object);
         }
 
+        // test the positive case
         [Test]
         public void ProcessOrder_WithSufficientFunds_ApprovesOrder()
         {
@@ -29,34 +30,31 @@ namespace OrderProcessor.Tests
             Assert.IsTrue(result.IsApproved);
         }
 
+        // test the edge case where account balance equals order amount
         [Test]
-        public void ProcessOrder_WithSufficientFunds_EdgeCase()
+        public void ProcessOrder_WithExactFunds_ApprovesOrder()
         {
-            //Arange
-            var customer = new Customer { AccountBalance = 250 };
+            // Arrange
+            var customer = new Customer { AccountBalance = 100 };
             _mockCustomerRepo.Setup(r => r.GetCustomer(2)).Returns(customer);
-            var order = new Order { Amount = 250 };
-
+            var order = new Order { Amount = 100 };
             // Act
             var result = _processor.ProcessOrder(2, order);
-
             // Assert
             Assert.IsTrue(result.IsApproved);
         }
 
+        // test the negative case 
         [Test]
-        public void ProcessOrder_WithSufficientFunds_NegativeCase()
+        public void ProcessOrder_WithInsufficientFunds_DeclinesOrder()
         {
-            //Arange
-            var customer = new Customer { AccountBalance = 250 };
-            _mockCustomerRepo.Setup(r => r.GetCustomer(3)).Returns(customer);
-            var order = new Order { Amount = 300 };
-
+            // Arrange
+            var customer = new Customer { AccountBalance = 50 };
+            _mockCustomerRepo.Setup(r => r.GetCustomer(1)).Returns(customer);
+            var order = new Order { Amount = 100 };
             // Act
             var result = _processor.ProcessOrder(3, order);
-
             // Assert
             Assert.IsFalse(result.IsApproved);
         }
-    }
 }
