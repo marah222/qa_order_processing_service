@@ -1,3 +1,4 @@
+using System.Reflection.Metadata;
 using Moq;
 
 namespace OrderProcessor.Tests
@@ -27,6 +28,57 @@ namespace OrderProcessor.Tests
 
             // Assert
             Assert.IsTrue(result.IsApproved);
+        }
+
+        [Test]
+        [TestCase(1, 200, 100)]
+        public void ProcessOrder_PremiumCustomerWithRush_ShouldNotChargeFee(int id, decimal accountBalance, decimal orderAmount)
+        {
+            // Arrange
+            var premiumCustomer = new Customer() { AccountBalance = accountBalance, IsPremium = true };
+            _mockCustomerRepo.Setup(r => r.GetCustomer(id)).Returns(premiumCustomer);
+
+            var order = new Order { Amount = orderAmount, IsRush = true };
+
+            //Act
+            var result = _processor.ProcessOrder(id, order);
+
+            //Assert
+            Assert.That(premiumCustomer.AccountBalance, Is.EqualTo(accountBalance - orderAmount));
+        }
+        [Test]
+        [TestCase(1, 200, 100)]
+        public void ProcessOrder_StandardCustomerWithRush_ShouldNotChargeFee(int id, decimal accountBalance, decimal orderAmount)
+        {
+            // Arrange
+            var premiumCustomer = new Customer() { AccountBalance = accountBalance, IsPremium = false };
+            _mockCustomerRepo.Setup(r => r.GetCustomer(id)).Returns(premiumCustomer);
+
+            var order = new Order { Amount = orderAmount, IsRush = true };
+
+            //Act
+            var result = _processor.ProcessOrder(id, order);
+
+            //Assert
+            Assert.That(premiumCustomer.AccountBalance, Is.EqualTo(accountBalance - orderAmount  - 20));
+        }
+        
+        [Test]
+        [TestCase(1,200,100, true)]
+        [TestCase(1,200,100, false)]
+        public void ProcessOrder_NonRushOrder_ShouldNotChargeFee(int  id, decimal accountBalance, decimal orderAmount, bool isPremium)
+        {
+            // Arrange
+            var premiumCustomer = new Customer() { AccountBalance = accountBalance, IsPremium = isPremium };
+            _mockCustomerRepo.Setup(r => r.GetCustomer(id)).Returns(premiumCustomer);
+
+            var order = new Order { Amount = orderAmount, IsRush = false };
+
+            //Act
+            var result = _processor.ProcessOrder(id, order);
+
+            //Assert
+            Assert.That(premiumCustomer.AccountBalance, Is.EqualTo(accountBalance - orderAmount));
         }
     }
 }
