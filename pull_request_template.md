@@ -1,4 +1,4 @@
-﻿---
+﻿﻿---
 name: Feature/Bug Fix Submission
 about: Use this template for submitting your tested code to the 'develop' branch.
 title: 'Fix: [Briefly describe the fix]'
@@ -8,21 +8,24 @@ assignees: ''
 
 ## 📝 Description
 
-the PR includes 3 tests to test the proper rejection of orders with insufficient funds .
-also a fix to a bug in the order processing logic to not withdraw from the account if there aren't sufficient funds
+*Provide a clear and concise description of the changes you made and the bug you fixed.*
+
 ---
 
 ## ✅ My Task
 
-the task was to ensure rejections happen correctly and for the right reasons.
+*State the specific business rule you were assigned to fix and test (e.g., "The Premium Customer Override Rule").*
 
 ---
 
 ## 🧪 How I Tested This
 
-- [ ] Tested the Standard Customer, Insufficient Funds case
-- [ ] Tested the Standard Customer, Rush Order, Insufficient Funds case
-- [ ] Tested the Standard Customer, Zero Balance
+*Describe the different scenarios and edge cases you wrote unit tests for. Be specific.*
+
+- [ ] Tested the main "happy path" scenario.
+- [ ] Tested the negative case (e.g., a standard customer with insufficient funds).
+- [ ] Tested an edge case (e.g., a customer with a balance exactly equal to the order amount).
+- [ ] ...add other tests you wrote...
 
 ---
 
