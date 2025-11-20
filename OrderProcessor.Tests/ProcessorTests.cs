@@ -30,6 +30,33 @@ namespace OrderProcessor.Tests
         }
 
         [Test]
+        public void ProcessOrder_PremiumCustomer_WithSufficientFunds_ApprovesOrder()
+        {
+            // Arrange
+            var customer = new Customer { IsPremium=true, AccountBalance = 200m };
+            _mockCustomerRepo.Setup(r => r.GetCustomer(1)).Returns(customer);
+            var order = new Order { Amount = 100m };
 
+            // Act
+            var result = _processor.ProcessOrder(1, order);
+
+            // Assert
+            Assert.IsTrue(result.IsApproved);
+        }
+
+        [Test]
+        public void ProcessOrder_StandardCustomer_WithInsufficientFunds_ApprovesOrder()
+        {
+            // Arrange
+            var customer = new Customer { IsPremium = false, AccountBalance = 200m };
+            _mockCustomerRepo.Setup(r => r.GetCustomer(1)).Returns(customer);
+            var order = new Order { Amount = 300m };
+
+            // Act
+            var result = _processor.ProcessOrder(1, order);
+
+            // Assert
+            Assert.IsFalse(result.IsApproved);
+        }
     }
 }
