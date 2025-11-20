@@ -14,15 +14,15 @@ namespace OrderProcessor.Tests
             _mockCustomerRepo = new Mock<ICustomerRepository>();
             _processor = new Processor(_mockCustomerRepo.Object);
         }
-
+        
         // test the positive case
         [Test]
         public void ProcessOrder_WithSufficientFunds_ApprovesOrder()
         {
             // Arrange
-            var customer = new Customer { AccountBalance = 200m };
+            var customer = new Customer { AccountBalance = 200 };
             _mockCustomerRepo.Setup(r => r.GetCustomer(1)).Returns(customer);
-            var order = new Order { Amount = 100m };
+            var order = new Order { Amount = 100 };
 
             // Act
             var result = _processor.ProcessOrder(1, order);
@@ -41,6 +41,9 @@ namespace OrderProcessor.Tests
             var order = new Order { Amount = 100 };
             // Act
             var result = _processor.ProcessOrder(2, order);
+
+            //Assert
+            Assert.IsTrue(result.IsApproved);
         }
         public void ProcessOrder_PremiumCustomer_WithInsufficientFunds_ApprovesOrder()
         {
@@ -48,14 +51,14 @@ namespace OrderProcessor.Tests
             // Set IsPremium to true and Balance to $10 (less than order amount)
             var customer = new Customer
             {
-                AccountBalance = 10m,
+                AccountBalance = 10,
                 IsPremium = true
             };
 
             _mockCustomerRepo.Setup(r => r.GetCustomer(1)).Returns(customer);
 
             // Create an order of $500 (greater than balance)
-            var order = new Order { Amount = 500m };
+            var order = new Order { Amount = 500 };
 
             // Act
             var result = _processor.ProcessOrder(1, order);
